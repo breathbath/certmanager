@@ -47,7 +47,7 @@ jobs:
   install:
     name: install app
     runs-on: ubuntu-latest
-    needs: [ docker ]
+    #needs: [ docker ]
     env:
       DOCKER_PULL_SECRET: ${{ secrets.DOCKER_PULL_SECRET }}
       DOCKER_REPOSITORY: ghcr.io/${{ github.repository }}
