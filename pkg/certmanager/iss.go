@@ -151,14 +151,14 @@ func (cm *CertManager) Issue() (cert, pk []byte, err error) {
 		return nil, nil, errors.Wrap(err, "Failed to obtain certificate")
 	}
 
-	logrus.Info(
+	logrus.Infof(
 		"Certificate successfully obtained, CertURL: %s, CertStableURL: %s, Domain: %s",
 		certRes.CertURL,
 		certRes.CertStableURL,
 		certRes.Domain,
 	)
 
-	return certRes.PrivateKey, certRes.Certificate, nil
+	return certRes.Certificate, certRes.PrivateKey, nil
 }
 
 func (cm *CertManager) obtain(request certificate.ObtainRequest, client *lego.Client) (cert *certificate.Resource, err error) {

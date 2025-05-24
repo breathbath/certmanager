@@ -25,10 +25,7 @@ var certManagerCmd = &cobra.Command{
 			return err
 		}
 
-		err = cm.Start(ctx)
-		if err != nil {
-			return err
-		}
+		go cm.RunPeriodically(ctx)
 
 		sig := <-sigs
 		logrus.Infof("Received signal %s, shutting down...", sig)
