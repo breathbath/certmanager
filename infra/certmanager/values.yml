@@ -1,0 +1,26 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/breathbath/certmanager
+  tag: latest
+  pullPolicy: IfNotPresent
+
+secretName: cert-manager-tls-secret
+targetNamespaces: "certmanager"
+
+docker:
+  pullSecret:
+
+serviceAccount:
+  create: true
+  name: cert-manager
+
+rev_id:
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 64Mi

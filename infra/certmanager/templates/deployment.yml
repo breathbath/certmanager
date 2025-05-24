@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-deployment
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app:  {{ .Chart.Name }}
+        release: {{ .Release.Name }}
+      annotations:
+        commit-hash: "rev/{{ .Values.rev_id }}"
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      containers:
+        - name: {{ .Release.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1002
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: "RuntimeDefault"
+            capabilities:
+              drop:
+                - ALL
+          env:
+            - name: SECRET_NAME
+              value: "{{ .Values.secretName }}"
+            - name: TARGET_NAMESPACES
+              value: "{{ .Values.targetNamespaces }}"
+          resources:
+            {{- toYaml .Values.resources | nindent 10 }}
+
