@@ -6,7 +6,8 @@ import (
 )
 
 type Config struct {
-	Port int `envconfig:"PORT" default:"8080"`
+	Port          int    `envconfig:"PORT" default:"8080"`
+	ChallengePath string `envconfig:"PATH" required:"true"`
 }
 
 func LoadConfig() (cfg *Config, err error) {

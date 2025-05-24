@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/x509"
 	"encoding/pem"
-	"github.com/breathbath/certmanager/pkg/tlsutil"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -24,7 +23,12 @@ func NewSecretManager(clientset *kubernetes.Clientset) *SecretManager {
 	return &SecretManager{clientset: clientset}
 }
 
-func (sm *SecretManager) EnsureTLSSecret(ctx context.Context, secretName string, namespaces []string) error {
+func (sm *SecretManager) EnsureTLSSecret(
+	ctx context.Context,
+	secretName string,
+	namespaces []string,
+	issue func() (certPEM, keyPEM []byte, err error),
+) error {
 	minValidity := 1 * time.Hour
 
 	for _, ns := range namespaces {
@@ -46,7 +50,7 @@ func (sm *SecretManager) EnsureTLSSecret(ctx context.Context, secretName string,
 
 		logrus.Infof("secret %s/%s does not exist or is not valid, generating a new one", ns, secretName)
 
-		certPEM, keyPEM, err := tlsutil.GenerateSelfSignedCert()
+		certPEM, keyPEM, err := issue()
 		if err != nil {
 			return errors.Wrapf(err, "failed to generate cert for %s", ns)
 		}

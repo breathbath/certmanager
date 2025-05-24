@@ -74,5 +74,5 @@ func (cm *CertManager) RunPeriodically(mainCtx context.Context) {
 }
 
 func (cm *CertManager) RunOnce(ctx context.Context) error {
-	return cm.kubeSecretManager.EnsureTLSSecret(ctx, cm.cfg.SecretName, cm.cfg.TargetNamespaces)
+	return cm.kubeSecretManager.EnsureTLSSecret(ctx, cm.cfg.SecretName, cm.cfg.TargetNamespaces, cm.Issue)
 }

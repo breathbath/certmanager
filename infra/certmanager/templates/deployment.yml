@@ -21,6 +21,9 @@ spec:
         commit-hash: "rev/{{ .Values.rev_id }}"
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name }}
+      volumes:
+        - name: acme-challenge-data
+          emptyDir: {}
       containers:
         - name: certmanager
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -41,8 +44,19 @@ spec:
               value: "{{ .Values.certManager.targetNamespaces }}"
             - name: CERTMANAGER_RUN_INTERVAL
               value: "{{ .Values.certManager.runInterval }}"
+            - name: CERTMANAGER_CHALLENGE_PATH
+              value: {{ .Values.sharedPath }}
+            - name: CERTMANAGER_CERT_EMAIL
+              value: {{ .Values.certManager.cert.email }}
+            - name: CERTMANAGER_CERT_DOMAIN
+              value: {{ .Values.certManager.cert.domain }}
+            - name: CERTMANAGER_ISSUE_TIMEOUT
+              value: {{ .Values.certManager.issTimeout }}
           resources:
             {{- toYaml .Values.certManager.resources | nindent 12 }}
+          volumeMounts:
+            - name: acme-challenge-data
+              mountPath: {{ .Values.sharedPath }}
           command:
             - /app/certmanager
             - certmanager
@@ -65,6 +79,11 @@ spec:
           env:
             - name: CHALLENGE_PORT
               value: "{{ .Values.challenge.port }}"
+            - name: CHALLENGE_PATH
+              value: "{{ .Values.sharedPath }}"
+          volumeMounts:
+            - name: acme-challenge-data
+              mountPath: {{ .Values.sharedPath }}
           resources:
             {{- toYaml .Values.challenge.resources | nindent 12 }}
           command:

@@ -25,6 +25,10 @@ certManager:
     requests:
       cpu: 100m
       memory: 64Mi
+  cert:
+    email: posandrey@gmail.com
+    domain: integrations.winespot.ai
+  issTimeout: 20m
 
 challenge:
   port: 8080
@@ -38,3 +42,5 @@ challenge:
 
 service:
   port: 80
+
+sharedPath: /acmeChallenge
