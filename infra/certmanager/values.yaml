@@ -5,9 +5,6 @@ image:
   tag: latest
   pullPolicy: Always
 
-secretName: cert-manager-tls-secret
-targetNamespaces: "certmanager"
-
 docker:
   pullSecret:
 
@@ -17,13 +14,27 @@ serviceAccount:
 
 rev_id:
 
-resources:
-  limits:
-    cpu: 200m
-    memory: 128Mi
-  requests:
-    cpu: 100m
-    memory: 64Mi
-
 certManager:
   runInterval: 1m
+  secretName: cert-manager-tls-secret
+  targetNamespaces: "certmanager"
+  resources:
+    limits:
+      cpu: 200m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
+
+challenge:
+  port: 8080
+  resources:
+    limits:
+      cpu: 300m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
+
+service:
+  port: 80

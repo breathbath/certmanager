@@ -10,5 +10,6 @@ func NewClient() (*kubernetes.Clientset, error) {
 	if err != nil {
 		return nil, err
 	}
+	
 	return kubernetes.NewForConfig(config)
 }

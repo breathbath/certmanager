@@ -4,11 +4,11 @@ import (
 	"context"
 	"crypto/x509"
 	"encoding/pem"
-	"fmt"
-	"github.com/breathbath/certmanager/internal/tlsutil"
+	"github.com/breathbath/certmanager/pkg/tlsutil"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"log"
 	"strings"
 	"time"
 
@@ -24,31 +24,31 @@ func NewSecretManager(clientset *kubernetes.Clientset) *SecretManager {
 	return &SecretManager{clientset: clientset}
 }
 
-func (sm *SecretManager) EnsureTLSSecret(secretName string, namespaces []string) error {
+func (sm *SecretManager) EnsureTLSSecret(ctx context.Context, secretName string, namespaces []string) error {
 	minValidity := 1 * time.Hour
 
 	for _, ns := range namespaces {
 		ns = strings.TrimSpace(ns)
 
-		secret, err := sm.clientset.CoreV1().Secrets(ns).Get(context.TODO(), secretName, metav1.GetOptions{})
+		secret, err := sm.clientset.CoreV1().Secrets(ns).Get(ctx, secretName, metav1.GetOptions{})
 		if err != nil && !apierrors.IsNotFound(err) {
-			return fmt.Errorf("failed to get secret %s/%s: %w", ns, secretName, err)
+			return errors.Wrapf(err, "failed to get secret %s/%s", ns, secretName)
 		}
 
 		isSecretFound := !apierrors.IsNotFound(err)
 
-		log.Printf("secret %s/%s found: %v\n", ns, secretName, isSecretFound)
+		logrus.Infof("secret %s/%s found: %v\n", ns, secretName, isSecretFound)
 
 		if isSecretFound && sm.IsCertValid(secret, minValidity) {
-			log.Printf("secret %s/%s already exists and is valid\n", ns, secretName)
+			logrus.Infof("secret %s/%s already exists and is valid\n", ns, secretName)
 			continue
 		}
 
-		log.Printf("secret %s/%s does not exist or is not valid, generating a new one\n", ns, secretName)
+		logrus.Infof("secret %s/%s does not exist or is not valid, generating a new one", ns, secretName)
 
 		certPEM, keyPEM, err := tlsutil.GenerateSelfSignedCert()
 		if err != nil {
-			return fmt.Errorf("failed to generate cert for %s: %w", ns, err)
+			return errors.Wrapf(err, "failed to generate cert for %s", ns)
 		}
 
 		secretData := map[string][]byte{
@@ -75,20 +75,22 @@ func (sm *SecretManager) EnsureTLSSecret(secretName string, namespaces []string)
 					if apierrors.IsConflict(err) {
 						secret, err = sm.clientset.CoreV1().Secrets(ns).Get(context.TODO(), secretName, metav1.GetOptions{})
 						if err != nil {
-							return fmt.Errorf("failed to get secret %s/%s on conflict retry: %w", ns, secretName, err)
+							return errors.Wrapf(err, "failed to get secret %s/%s on conflict retry", ns, secretName)
 						}
 						continue
 					}
-					return fmt.Errorf("failed to update secret %s/%s: %w", ns, secretName, err)
+					return errors.Wrapf(err, "failed to update secret %s/%s", ns, secretName)
 				}
-				log.Printf("updated secret %s/%s\n", ns, secretName)
+
+				logrus.Infof("updated secret %s/%s", ns, secretName)
+
 				break
 			}
 		} else {
 			if _, err := sm.clientset.CoreV1().Secrets(ns).Create(context.TODO(), tlsSecret, metav1.CreateOptions{}); err != nil {
-				return fmt.Errorf("failed to create secret %s/%s: %w", ns, secretName, err)
+				return errors.Wrapf(err, "failed to create secret %s/%s", ns, secretName)
 			}
-			log.Printf("created secret %s/%s\n", ns, secretName)
+			logrus.Infof("created secret %s/%s", ns, secretName)
 		}
 	}
 

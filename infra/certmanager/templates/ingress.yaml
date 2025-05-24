@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Chart.Name}}-ingress
+spec:
+  ingressClassName: webapprouting.kubernetes.azure.com
+  rules:
+    - host: integrations.winespot.ai
+      http:
+        paths:
+          - path: /.well-known/acme-challenge/(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Chart.Name }}-service
+                port:
+                  number: {{ .Values.service.port }}

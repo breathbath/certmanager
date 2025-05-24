@@ -13,7 +13,7 @@ ARG version
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo \
         -o /build/certmanager \
         -ldflags \
-        "-X git.vrsal.cc/alex/iros/pkg/cmd.Version=$version" \
+        "-X ggithub.com/breathbath/certmanager/pkg/cmd.Version=$version" \
         main.go
 
 # -------------
