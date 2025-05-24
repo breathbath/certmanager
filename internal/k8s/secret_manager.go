@@ -25,7 +25,7 @@ func NewSecretManager(clientset *kubernetes.Clientset) *SecretManager {
 }
 
 func (sm *SecretManager) EnsureTLSSecret(secretName string, namespaces []string) error {
-	minValidity := 7 * 24 * time.Hour
+	minValidity := 1 * time.Hour
 
 	for _, ns := range namespaces {
 		ns = strings.TrimSpace(ns)

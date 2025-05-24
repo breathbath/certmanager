@@ -28,7 +28,7 @@ func GenerateSelfSignedCert() (certPEM, keyPEM []byte, err error) {
 			Organization: []string{"Example Org"},
 		},
 		NotBefore: time.Now(),
-		NotAfter:  time.Now().Add(30 * 24 * time.Hour),
+		NotAfter:  time.Now().Add(5 * time.Minute),
 
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
