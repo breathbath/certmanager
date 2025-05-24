@@ -10,7 +10,7 @@ import (
 
 func Start(ctx context.Context) error {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/.well-known/acme-challenge/", challengeHandler)
+	mux.HandleFunc("/", challengeHandler)
 
 	cfg, err := LoadConfig()
 	if err != nil {

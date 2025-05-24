@@ -10,8 +10,8 @@ spec:
     - host: integrations.winespot.ai
       http:
         paths:
-          - path: /.well-known/acme-challenge/(.*)
-            pathType: ImplementationSpecific
+          - path: /.well-known/acme-challenge
+            pathType: Prefix
             backend:
               service:
                 name: {{ .Chart.Name }}-service
