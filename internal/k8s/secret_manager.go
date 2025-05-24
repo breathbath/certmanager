@@ -2,12 +2,16 @@ package k8s
 
 import (
 	"context"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
-	"log"
+	"github.com/breathbath/certmanager/internal/tlsutil"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
+	"time"
 
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -19,32 +23,85 @@ func NewSecretManager(clientset *kubernetes.Clientset) *SecretManager {
 	return &SecretManager{clientset: clientset}
 }
 
-func (sm *SecretManager) EnsureDummySecret(secretName string, namespaces []string) {
+func (sm *SecretManager) EnsureTLSSecret(secretName string, namespaces []string) error {
+	minValidity := 7 * 24 * time.Hour
+
 	for _, ns := range namespaces {
 		ns = strings.TrimSpace(ns)
-		fmt.Printf("Processing namespace: %s\n", ns)
 
-		_, err := sm.clientset.CoreV1().Secrets(ns).Get(context.TODO(), secretName, metav1.GetOptions{})
-		if err == nil {
-			fmt.Printf("Secret %s already exists in namespace %s\n", secretName, ns)
+		secret, err := sm.clientset.CoreV1().Secrets(ns).Get(context.TODO(), secretName, metav1.GetOptions{})
+		if err != nil && !apierrors.IsNotFound(err) {
+			return fmt.Errorf("failed to get secret %s/%s: %w", ns, secretName, err)
+		}
+
+		isSecretFound := !apierrors.IsNotFound(err)
+
+		if isSecretFound && sm.IsCertValid(secret, minValidity) {
 			continue
 		}
 
-		secret := &v1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: secretName,
-			},
-			Type: v1.SecretTypeOpaque,
-			Data: map[string][]byte{
-				"dummy": []byte("dummydata"),
-			},
+		certPEM, keyPEM, err := tlsutil.GenerateSelfSignedCert()
+		if err != nil {
+			return fmt.Errorf("failed to generate cert for %s: %w", ns, err)
 		}
 
-		_, err = sm.clientset.CoreV1().Secrets(ns).Create(context.TODO(), secret, metav1.CreateOptions{})
-		if err != nil {
-			log.Printf("Error creating secret in namespace %s: %v\n", ns, err)
+		secretData := map[string][]byte{
+			"tls.crt": certPEM,
+			"tls.key": keyPEM,
+		}
+
+		tlsSecret := &v1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      secretName,
+				Namespace: ns,
+			},
+			Type: v1.SecretTypeTLS,
+			Data: secretData,
+		}
+
+		if isSecretFound {
+			// Update existing secret with retry on conflict
+			for i := 0; i < 3; i++ {
+				secret.Data = secretData
+				secret.Type = v1.SecretTypeTLS
+
+				if _, err := sm.clientset.CoreV1().Secrets(ns).Update(context.TODO(), secret, metav1.UpdateOptions{}); err != nil {
+					if apierrors.IsConflict(err) {
+						secret, err = sm.clientset.CoreV1().Secrets(ns).Get(context.TODO(), secretName, metav1.GetOptions{})
+						if err != nil {
+							return fmt.Errorf("failed to get secret %s/%s on conflict retry: %w", ns, secretName, err)
+						}
+						continue
+					}
+					return fmt.Errorf("failed to update secret %s/%s: %w", ns, secretName, err)
+				}
+				break
+			}
 		} else {
-			fmt.Printf("Created dummy secret %s in namespace %s\n", secretName, ns)
+			if _, err := sm.clientset.CoreV1().Secrets(ns).Create(context.TODO(), tlsSecret, metav1.CreateOptions{}); err != nil {
+				return fmt.Errorf("failed to create secret %s/%s: %w", ns, secretName, err)
+			}
 		}
 	}
+
+	return nil
+}
+
+func (sm *SecretManager) IsCertValid(secret *v1.Secret, minValidity time.Duration) bool {
+	crtData, ok := secret.Data["tls.crt"]
+	if !ok {
+		return false
+	}
+
+	block, _ := pem.Decode(crtData)
+	if block == nil {
+		return false
+	}
+
+	cert, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return false
+	}
+
+	return cert.NotAfter.After(time.Now().Add(minValidity))
 }

@@ -21,5 +21,8 @@ func main() {
 
 	sm := k8s.NewSecretManager(clientset)
 	fmt.Println("Ensuring dummy secrets...")
-	sm.EnsureDummySecret(cfg.SecretName, cfg.TargetNamespaces)
+	err = sm.EnsureTLSSecret(cfg.SecretName, cfg.TargetNamespaces)
+	if err != nil {
+		log.Fatalf("Error ensuring TLS secret: %v", err)
+	}
 }
