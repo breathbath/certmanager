@@ -40,5 +40,5 @@ spec:
             - name: TARGET_NAMESPACES
               value: "{{ .Values.targetNamespaces }}"
           resources:
-            {{- toYaml .Values.resources | nindent 10 }}
+            {{- toYaml .Values.resources | nindent 12 }}
 
