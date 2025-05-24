@@ -10,6 +10,7 @@ env:
   KUBECONFIG: "config.kubeconfig"
 jobs:
   docker:
+    if: false
     name: build and Push Docker image
     runs-on: ubuntu-latest
     permissions:
