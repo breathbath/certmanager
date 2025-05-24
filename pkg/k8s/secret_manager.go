@@ -41,10 +41,10 @@ func (sm *SecretManager) EnsureTLSSecret(
 
 		isSecretFound := !apierrors.IsNotFound(err)
 
-		logrus.Infof("secret %s/%s found: %v\n", ns, secretName, isSecretFound)
+		logrus.Infof("secret %s/%s found: %v", ns, secretName, isSecretFound)
 
 		if isSecretFound && sm.IsCertValid(secret, minValidity) {
-			logrus.Infof("secret %s/%s already exists and is valid\n", ns, secretName)
+			logrus.Infof("secret %s/%s already exists and is valid", ns, secretName)
 			continue
 		}
 
