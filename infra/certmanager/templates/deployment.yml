@@ -39,6 +39,8 @@ spec:
               value: "{{ .Values.secretName }}"
             - name: TARGET_NAMESPACES
               value: "{{ .Values.targetNamespaces }}"
+            - name: CHECK_INTERVAL
+              value: "{{ .Values.certManager.runInterval }}"
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 

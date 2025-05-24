@@ -8,6 +8,7 @@ import (
 	"github.com/breathbath/certmanager/internal/tlsutil"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"log"
 	"strings"
 	"time"
 
@@ -36,9 +37,14 @@ func (sm *SecretManager) EnsureTLSSecret(secretName string, namespaces []string)
 
 		isSecretFound := !apierrors.IsNotFound(err)
 
+		log.Printf("secret %s/%s found: %v\n", ns, secretName, isSecretFound)
+
 		if isSecretFound && sm.IsCertValid(secret, minValidity) {
+			log.Printf("secret %s/%s already exists and is valid\n", ns, secretName)
 			continue
 		}
+
+		log.Printf("secret %s/%s does not exist or is not valid, generating a new one\n", ns, secretName)
 
 		certPEM, keyPEM, err := tlsutil.GenerateSelfSignedCert()
 		if err != nil {
@@ -75,12 +81,14 @@ func (sm *SecretManager) EnsureTLSSecret(secretName string, namespaces []string)
 					}
 					return fmt.Errorf("failed to update secret %s/%s: %w", ns, secretName, err)
 				}
+				log.Printf("updated secret %s/%s\n", ns, secretName)
 				break
 			}
 		} else {
 			if _, err := sm.clientset.CoreV1().Secrets(ns).Create(context.TODO(), tlsSecret, metav1.CreateOptions{}); err != nil {
 				return fmt.Errorf("failed to create secret %s/%s: %w", ns, secretName, err)
 			}
+			log.Printf("created secret %s/%s\n", ns, secretName)
 		}
 	}
 
