@@ -32,7 +32,7 @@ func NewCertManager() (*CertManager, error) {
 	}, nil
 }
 
-func (cm *CertManager) Start(ctx context.Context) error {
+func (cm *CertManager) Start(mainCtx context.Context) error {
 	logrus.Info("Running initial secret check...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -43,12 +43,12 @@ func (cm *CertManager) Start(ctx context.Context) error {
 		return err
 	}
 
-	go cm.RunPeriodically(ctx)
+	go cm.RunPeriodically(mainCtx)
 
 	return nil
 }
 
-func (cm *CertManager) RunPeriodically(ctx context.Context) {
+func (cm *CertManager) RunPeriodically(mainCtx context.Context) {
 	ticker := time.NewTicker(cm.cfg.RunInterval)
 	defer ticker.Stop()
 
@@ -67,8 +67,7 @@ func (cm *CertManager) RunPeriodically(ctx context.Context) {
 			} else {
 				logrus.Info("Secret check completed successfully")
 			}
-		case <-ctx.Done():
-			logrus.Info("Shutting down...")
+		case <-mainCtx.Done():
 			return
 		}
 	}

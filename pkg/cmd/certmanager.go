@@ -22,10 +22,12 @@ var certManagerCmd = &cobra.Command{
 
 		cm, err := certmanager.NewCertManager()
 		if err != nil {
+			return err
 		}
 
 		err = cm.Start(ctx)
 		if err != nil {
+			return err
 		}
 
 		sig := <-sigs
