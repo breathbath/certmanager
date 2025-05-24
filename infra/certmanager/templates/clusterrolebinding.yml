@@ -8,5 +8,5 @@ subjects:
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: secret-manager-clusterrole
+  name: cert-manager-clusterrole
   apiGroup: rbac.authorization.k8s.io
