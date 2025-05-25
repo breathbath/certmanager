@@ -3,6 +3,7 @@ package logging
 import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 type Config struct {
@@ -16,6 +17,8 @@ func LoadConfig() (cfg *Config, err error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to load db config")
 	}
+
+	logrus.Infof("loaded logging config: %+v", cfg)
 
 	return cfg, nil
 }

@@ -24,6 +24,9 @@ spec:
       volumes:
         - name: acme-challenge-data
           emptyDir: {}
+        - name: config-volume
+          configMap:
+            name: cert-issuer-config
       containers:
         - name: certmanager
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -38,25 +41,22 @@ spec:
               drop:
                 - ALL
           env:
-            - name: CERTMANAGER_SECRET_NAME
-              value: "{{ .Values.certManager.secretName }}"
-            - name: CERTMANAGER_TARGET_NAMESPACES
-              value: "{{ .Values.certManager.targetNamespaces }}"
             - name: CERTMANAGER_RUN_INTERVAL
               value: "{{ .Values.certManager.runInterval }}"
             - name: CERTMANAGER_CHALLENGE_PATH
               value: {{ .Values.sharedPath }}
-            - name: CERTMANAGER_CERT_EMAIL
-              value: {{ .Values.certManager.cert.email }}
-            - name: CERTMANAGER_CERT_DOMAIN
-              value: {{ .Values.certManager.cert.domain }}
             - name: CERTMANAGER_ISSUE_TIMEOUT
               value: {{ .Values.certManager.issTimeout }}
+            - name: CERTMANAGER_CONFIG_PATH
+              value:  {{ .Values.certManager.configPath }}
           resources:
             {{- toYaml .Values.certManager.resources | nindent 12 }}
           volumeMounts:
             - name: acme-challenge-data
               mountPath: {{ .Values.sharedPath }}
+            - name: config-volume
+              mountPath: {{ .Values.certManager.configPath }}
+              readOnly: true
           command:
             - /app/certmanager
             - certmanager

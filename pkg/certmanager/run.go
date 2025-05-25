@@ -45,18 +45,23 @@ func (cm *CertManager) RunPeriodically(mainCtx context.Context) {
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
 
-			err := cm.RunOnce(ctx)
-			if err != nil {
-				logrus.Error(err)
-			} else {
-				logrus.Info("Secret check completed successfully")
+			for _, task := range cm.cfg.CertTasks {
+				err := cm.kubeSecretManager.EnsureTLSSecret(
+					ctx,
+					task.Namespace,
+					task.Domain,
+					task.Secret,
+					task.Email,
+					cm.Issue,
+				)
+				if err != nil {
+					logrus.Error(err)
+				} else {
+					logrus.Info("Secret check completed successfully")
+				}
 			}
 		case <-mainCtx.Done():
 			return
 		}
 	}
-}
-
-func (cm *CertManager) RunOnce(ctx context.Context) error {
-	return cm.kubeSecretManager.EnsureTLSSecret(ctx, cm.cfg.SecretName, cm.cfg.TargetNamespaces, cm.Issue)
 }

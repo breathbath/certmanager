@@ -99,7 +99,7 @@ func (u *User) GetPrivateKey() crypto.PrivateKey {
 	return u.Key
 }
 
-func (cm *CertManager) Issue() (cert, pk []byte, err error) {
+func (cm *CertManager) Issue(email, domain string) (cert, pk []byte, err error) {
 	logrus.Info("Starting certificate issuance process")
 
 	userKey, err := rsa.GenerateKey(rand.Reader, 2048)
@@ -110,10 +110,10 @@ func (cm *CertManager) Issue() (cert, pk []byte, err error) {
 	logrus.Debug("Successfully generated private key")
 
 	user := &User{
-		Email: cm.cfg.CertEmail,
+		Email: email,
 		Key:   userKey,
 	}
-	logrus.Infof("Defined ACME user with email: %s", cm.cfg.CertEmail)
+	logrus.Infof("Defined ACME user with email: %s", email)
 
 	config := lego.NewConfig(user)
 	config.CADirURL = lego.LEDirectoryStaging
@@ -138,11 +138,11 @@ func (cm *CertManager) Issue() (cert, pk []byte, err error) {
 	user.Registration = reg
 
 	request := certificate.ObtainRequest{
-		Domains: []string{cm.cfg.CertDomain},
+		Domains: []string{domain},
 		Bundle:  true,
 	}
 
-	certRes, err := cm.obtain(request, client)
+	certRes, err := cm.obtain(request, client, domain)
 	if err != nil {
 		logrus.Errorf("Error obtaining certificate: %v", err)
 		if err2 := provider.Cleanup(); err2 != nil {
@@ -161,13 +161,13 @@ func (cm *CertManager) Issue() (cert, pk []byte, err error) {
 	return certRes.Certificate, certRes.PrivateKey, nil
 }
 
-func (cm *CertManager) obtain(request certificate.ObtainRequest, client *lego.Client) (cert *certificate.Resource, err error) {
+func (cm *CertManager) obtain(request certificate.ObtainRequest, client *lego.Client, domain string) (cert *certificate.Resource, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), cm.cfg.CertIssTimeout)
 	defer cancel()
 
 	logrus.Infof(
 		"Requesting certificate for domain: %s with timeout: %v",
-		cm.cfg.CertDomain,
+		domain,
 		cm.cfg.CertIssTimeout,
 	)
 
