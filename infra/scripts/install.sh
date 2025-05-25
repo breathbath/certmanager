@@ -7,7 +7,6 @@ function certmanager() {
        --set-string image.repository="${DOCKER_REPOSITORY}" \
        --set-string image.tag="${DOCKER_TAG}" \
        --set-string rev_id="${REV_ID}" \
-       --set-file challenge.domains=./infra/certmanager/files/config.json
        -f ./infra/certmanager/values.yaml
 }
 
