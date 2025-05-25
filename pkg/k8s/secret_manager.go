@@ -38,19 +38,19 @@ func (sm *SecretManager) EnsureTLSSecret(
 
 	secret, err := sm.clientset.CoreV1().Secrets(namespace).Get(ctx, secretName, metav1.GetOptions{})
 	if err != nil && !apierrors.IsNotFound(err) {
-		return errors.Wrapf(err, "failed to request secret %s/%s from k8s api", namespace, secret)
+		return errors.Wrapf(err, "failed to request secret %s/%s from k8s api", namespace, secretName)
 	}
 
 	isSecretFound := !apierrors.IsNotFound(err)
 
-	logrus.Infof("secret %s/%s found: %v", namespace, secret, isSecretFound)
+	logrus.Infof("secret %s/%s found: %v", namespace, secretName, isSecretFound)
 
 	if isSecretFound && sm.IsCertValid(secret, minValidity) {
-		logrus.Infof("secret %s/%s already exists and is valid", namespace, secret)
+		logrus.Infof("secret %s/%s already exists and is valid", namespace, secretName)
 		return nil
 	}
 
-	logrus.Infof("secret %s/%s does not exist or is not valid, generating a new one", namespace, secret)
+	logrus.Infof("secret %s/%s does not exist or is not valid, generating a new one", namespace, secretName)
 
 	certPEM, keyPEM, err := issue(email, domain)
 	if err != nil {
