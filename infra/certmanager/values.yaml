@@ -24,7 +24,6 @@ certManager:
       cpu: 50m
       memory: 30Mi
   issTimeout: 20m
-  configPath: /etc/cert-manager/config.json
 
 challenge:
   port: 8080
