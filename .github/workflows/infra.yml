@@ -42,7 +42,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           file: Dockerfile
-          build-args: version=${{ steps.meta.outputs.version }}
+          build-args: version=${{ steps.meta.outputs.version }}/${{ github.sha }}
   install:
     name: install app
     runs-on: ubuntu-latest
