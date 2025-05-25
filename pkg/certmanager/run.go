@@ -33,35 +33,53 @@ func NewCertManager() (*CertManager, error) {
 }
 
 func (cm *CertManager) RunPeriodically(mainCtx context.Context) {
+	logrus.Infof(
+		"Waiting for initial delay of %v before starting periodic checks",
+		cm.cfg.InitialDelay,
+	)
+
+	// Wait for initial delay
+	select {
+	case <-time.After(cm.cfg.InitialDelay):
+		logrus.Info("Running the initial secret check after delay...")
+		cm.runTasks()
+	case <-mainCtx.Done():
+		return
+	}
+
+	// Start periodic loop
 	ticker := time.NewTicker(cm.cfg.RunInterval)
 	defer ticker.Stop()
 
 	logrus.Infof("Starting periodic secret checks every %s", cm.cfg.RunInterval)
-
 	for {
 		select {
 		case <-ticker.C:
 			logrus.Info("Running periodic secret check...")
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
-
-			for _, task := range cm.cfg.CertTasks {
-				err := cm.kubeSecretManager.EnsureTLSSecret(
-					ctx,
-					task.Namespace,
-					task.Domain,
-					task.Secret,
-					task.Email,
-					cm.Issue,
-				)
-				if err != nil {
-					logrus.Error(err)
-				} else {
-					logrus.Info("Secret check completed successfully")
-				}
-			}
+			cm.runTasks()
 		case <-mainCtx.Done():
 			return
+		}
+	}
+}
+
+func (cm *CertManager) runTasks() {
+	for _, task := range cm.cfg.CertTasks {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		err := cm.kubeSecretManager.EnsureTLSSecret(
+			ctx,
+			task.Namespace,
+			task.Domain,
+			task.Secret,
+			task.Email,
+			cm.Issue,
+		)
+		if err != nil {
+			logrus.Error(err)
+		} else {
+			logrus.Info("Secret check completed successfully")
 		}
 	}
 }

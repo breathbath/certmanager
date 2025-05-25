@@ -46,6 +46,8 @@ spec:
           env:
             - name: CERTMANAGER_RUN_INTERVAL
               value: "{{ .Values.certManager.runInterval }}"
+            - name: CERTMANAGER_INITIAL_DELAY
+              value: "{{ .Values.certManager.initialDelay }}"
             - name: CERTMANAGER_CHALLENGE_PATH
               value: {{ .Values.sharedPath }}
             - name: CERTMANAGER_ISSUE_TIMEOUT

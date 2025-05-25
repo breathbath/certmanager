@@ -16,6 +16,7 @@ rev_id:
 
 certManager:
   runInterval: 1h
+  initialDelay: 1m
   resources:
     limits:
       cpu: 500m
