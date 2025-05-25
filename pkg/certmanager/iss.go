@@ -116,7 +116,7 @@ func (cm *CertManager) Issue(email, domain string) (cert, pk []byte, err error) 
 	logrus.Infof("Defined ACME user with email: %s", email)
 
 	config := lego.NewConfig(user)
-	config.CADirURL = lego.LEDirectoryStaging
+	config.CADirURL = lego.LEDirectoryProduction
 
 	client, err := lego.NewClient(config)
 	if err != nil {
