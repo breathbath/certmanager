@@ -1,0 +1,8 @@
+[
+  {
+    "Namespace": "integrations",
+    "Domain": "integrations.winespot.ai",
+    "Secret": "integration-tls-secret",
+    "Email": "posandrey@gmail.com"
+  }
+]

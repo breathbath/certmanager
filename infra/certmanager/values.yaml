@@ -15,30 +15,26 @@ serviceAccount:
 rev_id:
 
 certManager:
-  runInterval: 1m
-  secretName: cert-manager-tls-secret
-  targetNamespaces: "certmanager"
+  runInterval: 1h
   resources:
     limits:
-      cpu: 200m
+      cpu: 500m
       memory: 128Mi
     requests:
-      cpu: 100m
-      memory: 64Mi
-  cert:
-    email: posandrey@gmail.com
-    domain: integrations.winespot.ai
+      cpu: 50m
+      memory: 30Mi
   issTimeout: 20m
+  configPath: /etc/cert-manager/config.json
 
 challenge:
   port: 8080
   resources:
     limits:
-      cpu: 300m
+      cpu: 500m
       memory: 128Mi
     requests:
-      cpu: 100m
-      memory: 64Mi
+      cpu: 50m
+      memory: 30Mi
 
 service:
   port: 80
