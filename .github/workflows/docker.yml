@@ -23,6 +23,10 @@ on:
         required: true
       password:
         required: true
+    outputs:
+      docker_tag:
+        description: "Docker tag"
+        value: ${{ jobs.docker.outputs.docker_tag }}
 jobs:
   docker:
     name: Build and Push Docker Images

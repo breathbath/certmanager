@@ -52,6 +52,12 @@ jobs:
       DOCKER_TAG: ${{ needs.docker-amd64.outputs.docker_tag }}
       REV_ID: ${{ github.sha }}
     steps:
+      - name: Check if DOCKER_TAG is set
+        run: |
+          if [ -z "${DOCKER_TAG}" ]; then
+            echo "Error: DOCKER_TAG is not set"
+            exit 1
+          fi
       - name: Check out the repo
         uses: actions/checkout@v4
       - name: 'Install helm'
