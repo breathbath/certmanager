@@ -10,5 +10,11 @@
     "Domain": "integrations.winespot.ai",
     "Secret": "chat-tls-secret",
     "Email": "posandrey@gmail.com"
-  }
+  },
+  {
+    "Namespace": "default",
+    "Domain": "integrations.winespot.ai",
+    "Secret": "default-tls-secret",
+    "Email": "posandrey@gmail.com"
+  },
 ]
