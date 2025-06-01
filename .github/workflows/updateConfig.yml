@@ -1,0 +1,34 @@
+name: Update config
+on:
+  workflow_dispatch:
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  KUBECONFIG: "config.kubeconfig"
+jobs:
+  validate-config:
+    uses: ./.github/workflows/config.yml
+  install-config:
+    name: install config
+    runs-on: ubuntu-latest
+    needs: [ validate-config ]
+    env:
+      REV_ID: ${{ github.sha }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+      - name: 'Install helm'
+        uses: 'azure/setup-helm@v4.3.0'
+      - name: Kubectl configuration
+        run: |
+          echo ${{ secrets.KUBECONFIG_PROD }} | base64 --decode > "${KUBECONFIG}"
+          chmod 600 "${KUBECONFIG}"
+      - name: 'Prepare'
+        run: 'chmod +x ./infra/scripts/install.sh'
+      - name: 'Install config for certmanager'
+        run: './infra/scripts/install.sh certmanagerConfig'
+      - name: cleanup
+        if: always()
+        run: |
+          rm -f "${KUBECONFIG}"
+

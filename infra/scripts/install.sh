@@ -10,4 +10,12 @@ function certmanager() {
        -f ./infra/certmanager/values.yaml
 }
 
+function certmanagerConfig() {
+   helm upgrade certmanager ./infra/certmanager \
+       --reuse-values \
+       --kubeconfig "${KUBECONFIG}" \
+       --namespace certmanager \
+       --set-string rev_id="${REV_ID}"
+}
+
 "$@"

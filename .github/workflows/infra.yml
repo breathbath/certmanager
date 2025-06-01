@@ -1,71 +1,57 @@
-name: Install
+name: Builds docker and installs all infra
 on:
-  push:
-    branches:
-      - 'main'
   workflow_dispatch:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   KUBECONFIG: "config.kubeconfig"
 jobs:
-  docker:
-    name: build and Push Docker image
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [amd64, arm64]
+  validate-config:
+    uses: ./.github/workflows/config.yml
+  docker-arm64: #for GitHub public repositories only see https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners
+    needs:
+      - validate-config
+    uses: ./.github/workflows/docker.yml
     permissions:
       contents: read
       packages: write
       attestations: write
       id-token: write
-    outputs:
-      docker_tag: ${{ steps.meta.outputs.version }}
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          driver-opts: image=moby/buildkit:latest
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=sha
-      - name: Build and push Docker image for ${{ matrix.arch }}
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}-${{ matrix.arch }}
-          labels: ${{ steps.meta.outputs.labels }}-${{ matrix.arch }}
-          file: Dockerfile
-          build-args: version=${{ steps.meta.outputs.version }}/${{ github.sha }}
-          platforms: linux/${{ matrix.arch }}
+    with:
+      arch: arm64
+      registry: ${{ env.REGISTRY }}
+      file: Dockerfile
+      runner: ubuntu-22.04-arm
+      image: ${{ env.IMAGE_NAME }}
+    secrets:
+      username: ${{ github.actor }}
+      password: ${{ secrets.GITHUB_TOKEN }}
+  docker-amd64:
+    needs:
+     - validate-config
+    uses: ./.github/workflows/docker.yml
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    with:
+      arch: amd64
+      registry: ${{ env.REGISTRY }}
+      file: Dockerfile
+      runner: ubuntu-latest
+      image: ${{ env.IMAGE_NAME }}
+    secrets:
+      username: ${{ github.actor }}
+      password: ${{ secrets.GITHUB_TOKEN }}
   install:
     name: install app
     runs-on: ubuntu-latest
-    needs: [ docker ]
+    needs: [ docker-amd64, docker-arm64 ]
     env:
       DOCKER_PULL_SECRET: ${{ secrets.DOCKER_PULL_SECRET }}
       DOCKER_REPOSITORY: ghcr.io/${{ github.repository }}
-      DOCKER_TAG: ${{ needs.docker.outputs.docker_tag }}
+      DOCKER_TAG: ${{ needs.docker-amd64.outputs.docker_tag }}
       REV_ID: ${{ github.sha }}
     steps:
       - name: Check out the repo
