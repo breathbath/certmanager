@@ -2,8 +2,6 @@ name: Builds docker and installs all infra
 on:
   workflow_dispatch:
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
   KUBECONFIG: "config.kubeconfig"
 jobs:
   validate-config:
@@ -19,10 +17,10 @@ jobs:
       id-token: write
     with:
       arch: arm64
-      registry: ${{ env.REGISTRY }}
+      registry: ghcr.io
       file: Dockerfile
       runner: ubuntu-22.04-arm
-      image: ${{ env.IMAGE_NAME }}
+      image: ${{ github.repository }}
     secrets:
       username: ${{ github.actor }}
       password: ${{ secrets.GITHUB_TOKEN }}
@@ -37,10 +35,10 @@ jobs:
       id-token: write
     with:
       arch: amd64
-      registry: ${{ env.REGISTRY }}
+      registry: ghcr.io
       file: Dockerfile
       runner: ubuntu-latest
-      image: ${{ env.IMAGE_NAME }}
+      image: ${{ github.repository }}
     secrets:
       username: ${{ github.actor }}
       password: ${{ secrets.GITHUB_TOKEN }}
