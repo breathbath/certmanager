@@ -24,24 +24,6 @@ jobs:
     secrets:
       username: ${{ github.actor }}
       password: ${{ secrets.GITHUB_TOKEN }}
-  docker-amd64:
-    needs:
-     - validate-config
-    uses: ./.github/workflows/docker.yml
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
-      id-token: write
-    with:
-      arch: amd64
-      registry: ghcr.io
-      file: Dockerfile
-      runner: ubuntu-latest
-      image: ${{ github.repository }}
-    secrets:
-      username: ${{ github.actor }}
-      password: ${{ secrets.GITHUB_TOKEN }}
   install:
     name: install app
     runs-on: ubuntu-latest
@@ -49,7 +31,7 @@ jobs:
     env:
       DOCKER_PULL_SECRET: ${{ secrets.DOCKER_PULL_SECRET }}
       DOCKER_REPOSITORY: ghcr.io/${{ github.repository }}
-      DOCKER_TAG: ${{ needs.docker-amd64.outputs.docker_tag }}
+      DOCKER_TAG: ${{ needs.docker-arm64.outputs.docker_tag }}
       REV_ID: ${{ github.sha }}
     steps:
       - name: Check if DOCKER_TAG is set
