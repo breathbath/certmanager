@@ -1,12 +1,12 @@
 [
   {
-    "Namespace": "integrations",
+    "Namespace": "default",
     "Domain": "integrations.winespot.ai",
     "Secret": "integration-tls-secret",
     "Email": "posandrey@gmail.com"
   },
   {
-    "Namespace": "front",
+    "Namespace": "default",
     "Domain": "integrations.winespot.ai",
     "Secret": "chat-tls-secret",
     "Email": "posandrey@gmail.com"
