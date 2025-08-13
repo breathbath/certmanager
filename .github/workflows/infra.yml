@@ -26,7 +26,7 @@ jobs:
       password: ${{ secrets.GITHUB_TOKEN }}
   install:
     name: install app
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [ docker-arm64 ]
     env:
       DOCKER_PULL_SECRET: ${{ secrets.DOCKER_PULL_SECRET }}
