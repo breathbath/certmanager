@@ -19,7 +19,7 @@ jobs:
       arch: arm64
       registry: ghcr.io
       file: Dockerfile
-      runner: ubuntu-22.04-arm
+      runner: self-hosted
       image: ${{ github.repository }}
     secrets:
       username: ${{ github.actor }}
