@@ -9,6 +9,8 @@ jobs:
   validate-config:
     uses: ./.github/workflows/config.yml
   install-config:
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}
     name: install config
     runs-on: self-hosted
     needs: [ validate-config ]
@@ -21,7 +23,7 @@ jobs:
         uses: 'azure/setup-helm@v4.3.0'
       - name: Kubectl configuration
         run: |
-          echo ${{ secrets.KUBECONFIG_PROD }} | base64 --decode > "${KUBECONFIG}"
+          echo ${{ secrets.KUBECONFIG }} | base64 --decode > "${KUBECONFIG}"
           chmod 600 "${KUBECONFIG}"
       - name: 'Prepare'
         run: 'chmod +x ./infra/scripts/install.sh'

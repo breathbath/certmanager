@@ -28,6 +28,8 @@ jobs:
     name: install app
     runs-on: self-hosted
     needs: [ docker-arm64 ]
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}
     env:
       DOCKER_PULL_SECRET: ${{ secrets.DOCKER_PULL_SECRET }}
       DOCKER_REPOSITORY: ghcr.io/${{ github.repository }}
@@ -46,7 +48,7 @@ jobs:
         uses: 'azure/setup-helm@v4.3.0'
       - name: Kubectl configuration
         run: |
-          echo ${{ secrets.KUBECONFIG_PROD }} | base64 --decode > "${KUBECONFIG}"
+          echo ${{ secrets.KUBECONFIG }} | base64 --decode > "${KUBECONFIG}"
           chmod 600 "${KUBECONFIG}"
       - name: 'Prepare'
         run: 'chmod +x ./infra/scripts/install.sh'
