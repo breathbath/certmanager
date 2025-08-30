@@ -1,0 +1,20 @@
+[
+  {
+    "Namespace": "default",
+    "Domain": "staging.winespot.ai",
+    "Secret": "integration-tls-secret",
+    "Email": "posandrey@gmail.com"
+  },
+  {
+    "Namespace": "default",
+    "Domain": "staging.winespot.ai",
+    "Secret": "chat-tls-secret",
+    "Email": "posandrey@gmail.com"
+  },
+  {
+    "Namespace": "default",
+    "Domain": "staging.winespot.ai",
+    "Secret": "default-tls-secret",
+    "Email": "posandrey@gmail.com"
+  }
+]

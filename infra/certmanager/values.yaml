@@ -40,3 +40,4 @@ service:
   port: 80
 
 sharedPath: /acmeChallenge
+configPath:

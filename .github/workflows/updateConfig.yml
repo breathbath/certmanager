@@ -1,6 +1,14 @@
 name: Update config
 on:
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      env:
+        required: true
+        type: string
+      config-path:
+        required: true
+        type: string
+    secrets: inherit
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -8,14 +16,17 @@ env:
 jobs:
   validate-config:
     uses: ./.github/workflows/config.yml
+    with:
+      config-path: ${{ inputs.config-path }}
   install-config:
     environment:
-      name: ${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}
+      name: ${{ inputs.env }}
     name: install config
     runs-on: self-hosted
     needs: [ validate-config ]
     env:
       REV_ID: ${{ github.sha }}
+      CONFIG_PATH: ${{ inputs.config-path }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4

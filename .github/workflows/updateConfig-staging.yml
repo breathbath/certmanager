@@ -1,0 +1,9 @@
+name: Update config staging
+on:
+  workflow_dispatch:
+jobs:
+  validate-config:
+    uses: ./.github/workflows/updateConfig.yml
+    with:
+      env: staging
+      config-path: ./infra/certmanager/files/config-staging.json

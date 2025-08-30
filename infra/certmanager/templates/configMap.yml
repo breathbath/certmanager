@@ -5,4 +5,4 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   config.json: |
-{{ (.Files.Get "files/config.json") | indent 4 }}
+{{ (.Files.Get .Values.configPath) | indent 4 }}

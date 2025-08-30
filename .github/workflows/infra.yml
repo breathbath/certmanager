@@ -1,12 +1,22 @@
 name: Builds docker and installs all infra
 on:
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      env:
+        required: true
+        type: string
+      config-path:
+        required: true
+        type: string
+    secrets: inherit
 env:
   KUBECONFIG: "config.kubeconfig"
 jobs:
   validate-config:
     uses: ./.github/workflows/config.yml
-  docker-arm64: #for GitHub public repositories only see https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners
+    with:
+      config-path: ${{ inputs.config-path }}
+  docker: #for GitHub public repositories only see https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners
     needs:
       - validate-config
     uses: ./.github/workflows/docker.yml
@@ -27,14 +37,16 @@ jobs:
   install:
     name: install app
     runs-on: self-hosted
-    needs: [ docker-arm64 ]
+    needs: [ docker ]
     environment:
-      name: ${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}
+      name: ${{ inputs.env }}
     env:
       DOCKER_PULL_SECRET: ${{ secrets.DOCKER_PULL_SECRET }}
       DOCKER_REPOSITORY: ghcr.io/${{ github.repository }}
       DOCKER_TAG: ${{ needs.docker-arm64.outputs.docker_tag }}
       REV_ID: ${{ github.sha }}
+      ENVIRONMENT: ${{ inputs.env }}
+      CONFIG_PATH: ${{ inputs.config-path }}
     steps:
       - name: Check if DOCKER_TAG is set
         run: |
