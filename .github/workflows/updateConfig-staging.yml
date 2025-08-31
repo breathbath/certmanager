@@ -7,3 +7,4 @@ jobs:
     with:
       env: staging
       config-path: ./infra/certmanager/files/config-staging.json
+    secrets: inherit

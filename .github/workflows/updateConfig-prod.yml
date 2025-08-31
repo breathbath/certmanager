@@ -7,3 +7,4 @@ jobs:
     with:
       env: prod
       config-path: ./infra/certmanager/files/config-prod.json
+    secrets: inherit
