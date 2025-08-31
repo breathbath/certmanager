@@ -7,6 +7,7 @@ jobs:
     with:
       env: prod
       config-path: ./infra/certmanager/files/config-prod.json
+      helm-config-path: files/config-prod.json
     secrets: inherit
     permissions:
       contents: read

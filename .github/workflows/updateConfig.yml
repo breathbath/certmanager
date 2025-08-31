@@ -8,6 +8,9 @@ on:
       config-path:
         required: true
         type: string
+      helm-config-path:
+        required: true
+        type: string
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -27,7 +30,7 @@ jobs:
     needs: [ validate-config ]
     env:
       REV_ID: ${{ github.sha }}
-      CONFIG_PATH: ${{ inputs.config-path }}
+      CONFIG_PATH: ${{ inputs.helm-config-path }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4

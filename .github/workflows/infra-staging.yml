@@ -7,6 +7,7 @@ jobs:
     with:
       env: staging
       config-path: ./infra/certmanager/files/config-staging.json
+      helm-config-path: files/config-staging.json
     secrets: inherit
     permissions:
       contents: read

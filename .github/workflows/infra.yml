@@ -8,6 +8,9 @@ on:
       config-path:
         required: true
         type: string
+      helm-config-path:
+        required: true
+        type: string
 env:
   KUBECONFIG: "config.kubeconfig"
 jobs:
@@ -68,7 +71,7 @@ jobs:
       DOCKER_TAG: ${{ needs.docker.outputs.docker_tag }}
       REV_ID: ${{ github.sha }}
       ENVIRONMENT: ${{ inputs.env }}
-      CONFIG_PATH: ${{ inputs.config-path }}
+      CONFIG_PATH: ${{ inputs.helm-config-path }}
     steps:
       - name: Check if DOCKER_TAG is set
         run: |
