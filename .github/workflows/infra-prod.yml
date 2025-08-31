@@ -1,4 +1,4 @@
-name: Install staging
+name: Install prod
 on:
   workflow_dispatch:
 jobs:
