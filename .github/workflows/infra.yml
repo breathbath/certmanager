@@ -12,27 +12,50 @@ env:
   KUBECONFIG: "config.kubeconfig"
 jobs:
   validate-config:
-    uses: ./.github/workflows/config.yml
-    with:
-      config-path: ${{ inputs.config-path }}
-  docker: #for GitHub public repositories only see https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JSON config
+        run: jq empty ${{ inputs.config-path }}
+  docker:
     needs:
       - validate-config
-    uses: ./.github/workflows/docker.yml
+    name: Build and Push Docker Images
+    runs-on: self-hosted
     permissions:
       contents: read
       packages: write
       attestations: write
       id-token: write
-    with:
-      arch: arm64
-      registry: ghcr.io
-      file: Dockerfile
-      runner: self-hosted
-      image: ${{ github.repository }}
-    secrets:
-      username: ${{ github.actor }}
-      password: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      docker_tag: ${{ steps.meta.outputs.version }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username:  ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=sha
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/arm64
   install:
     name: install app
     runs-on: self-hosted
@@ -42,7 +65,7 @@ jobs:
     env:
       DOCKER_PULL_SECRET: ${{ secrets.DOCKER_PULL_SECRET }}
       DOCKER_REPOSITORY: ghcr.io/${{ github.repository }}
-      DOCKER_TAG: ${{ needs.docker-arm64.outputs.docker_tag }}
+      DOCKER_TAG: ${{ needs.docker.outputs.docker_tag }}
       REV_ID: ${{ github.sha }}
       ENVIRONMENT: ${{ inputs.env }}
       CONFIG_PATH: ${{ inputs.config-path }}

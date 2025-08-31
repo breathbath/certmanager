@@ -14,9 +14,11 @@ env:
   KUBECONFIG: "config.kubeconfig"
 jobs:
   validate-config:
-    uses: ./.github/workflows/config.yml
-    with:
-      config-path: ${{ inputs.config-path }}
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JSON config
+        run: jq empty ${{ inputs.config-path }}
   install-config:
     environment:
       name: ${{ inputs.env }}

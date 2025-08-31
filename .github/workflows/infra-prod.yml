@@ -2,9 +2,14 @@ name: Install staging
 on:
   workflow_dispatch:
 jobs:
-  validate-config:
+  install:
     uses: ./.github/workflows/infra.yml
     with:
       env: prod
       config-path: ./infra/certmanager/files/config-prod.json
     secrets: inherit
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
