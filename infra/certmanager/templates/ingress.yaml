@@ -1,4 +1,4 @@
-{{- $configJson := .Files.Get "files/config.json" | fromJsonArray }}
+{{- $configJson := .Files.Get .Values.configPath | fromJsonArray }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
