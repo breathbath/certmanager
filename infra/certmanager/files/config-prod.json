@@ -16,7 +16,7 @@
     "Domain": "integrations.winespot.ai",
     "Secret": "default-tls-secret",
     "Email": "posandrey@gmail.com"
-  }
+  },
   {
     "Namespace": "default",
     "Domain": "admin.winespot.ai",
