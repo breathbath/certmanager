@@ -16,5 +16,17 @@
     "Domain": "staging.winespot.ai",
     "Secret": "default-tls-secret",
     "Email": "posandrey@gmail.com"
+  },
+  {
+    "Namespace": "default",
+    "Domain": "admin-test.winespot.ai",
+    "Secret": "admin-tls-secret",
+    "Email": "posandrey@gmail.com"
+  },
+  {
+    "Namespace": "kubernetes-dashboard",
+    "Domain": "cluster-test.winespot.ai",
+    "Secret": "cluster-tls-secret",
+    "Email": "posandrey@gmail.com"
   }
 ]
