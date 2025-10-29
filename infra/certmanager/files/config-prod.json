@@ -28,5 +28,11 @@
     "Domain": "cluster.winespot.ai",
     "Secret": "cluster-tls-secret",
     "Email": "posandrey@gmail.com"
+  },
+  {
+    "Namespace": "default",
+    "Domain": "dashboard.winespot.ai",
+    "Secret": "dashboard-tls-secret",
+    "Email": "posandrey@gmail.com"
   }
 ]
