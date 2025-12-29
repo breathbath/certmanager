@@ -37,7 +37,7 @@
   },
   {
     "Namespace": "default",
-    "Domain": "getwinespot.com",
+    "Domain": "integrations.getwinespot.com",
     "Secret": "getwinespot-tls-secret",
     "Email": "posandrey@gmail.com"
   }
