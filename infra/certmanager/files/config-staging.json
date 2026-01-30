@@ -24,7 +24,7 @@
     "Email": "posandrey@gmail.com"
   },
   {
-    "Namespace": "kubernetes-dashboard",
+    "Namespace": "default",
     "Domain": "cluster-test.winespot.ai",
     "Secret": "cluster-tls-secret",
     "Email": "posandrey@gmail.com"
