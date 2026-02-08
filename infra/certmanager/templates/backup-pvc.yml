@@ -1,0 +1,19 @@
+{{- if .Values.certManager.backup.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-backup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+spec:
+  accessModes:
+    {{- toYaml .Values.certManager.backup.pvc.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.certManager.backup.pvc.size }}
+  {{- if .Values.certManager.backup.pvc.storageClassName }}
+  storageClassName: {{ .Values.certManager.backup.pvc.storageClassName }}
+  {{- end }}
+{{- end }}

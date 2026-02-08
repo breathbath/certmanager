@@ -20,6 +20,7 @@ type Config struct {
 	RunInterval    time.Duration `envconfig:"RUN_INTERVAL" default:"5m"`
 	InitialDelay   time.Duration `envconfig:"INITIAL_DELAY" default:"1m"`
 	ChallengePath  string        `envconfig:"CHALLENGE_PATH" required:"true"`
+	BackupPath     string        `envconfig:"BACKUP_PATH"`
 	CertIssTimeout time.Duration `envconfig:"ISSUE_TIMEOUT" default:"20m"`
 	ConfigPath     string        `envconfig:"CONFIG_PATH" requited:"true"`
 	CertTasks      []CertTask

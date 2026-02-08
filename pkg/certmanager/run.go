@@ -74,6 +74,7 @@ func (cm *CertManager) runTasks() {
 			task.Domain,
 			task.Secret,
 			task.Email,
+			cm.cfg.BackupPath,
 			cm.Issue,
 		)
 		if err != nil {

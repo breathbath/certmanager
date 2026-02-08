@@ -17,6 +17,14 @@ rev_id:
 certManager:
   runInterval: 1h
   initialDelay: 1m
+  backup:
+    enabled: true
+    path: /acmeBackup
+    pvc:
+      storageClassName: default
+      size: 256Mi
+      accessModes:
+        - ReadWriteOnce
   resources:
     limits:
       cpu: 500m
